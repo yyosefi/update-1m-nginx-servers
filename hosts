@@ -1,0 +1,2 @@
+[web_servers]
+nginx ansible_host=172.174.48.34

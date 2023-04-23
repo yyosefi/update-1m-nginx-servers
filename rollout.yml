@@ -1,0 +1,58 @@
+---
+
+- name: Rollout new configuration
+  hosts: nginx
+  become: true
+
+  tasks:
+    - name: Copy new nginx configuration for us server
+      template:
+        src: confs/nginx_us.conf.j2
+        dest: /etc/nginx/sites-enabled/us.conf
+      notify:
+        - verify conf
+        - restart nginx
+      tags:
+        - us
+
+    - name: Copy new nginx configuration for eu server
+      template:
+        src: confs/nginx_eu.conf.j2
+        dest: /etc/nginx/sites-enabled/eu.conf
+      notify:
+        - verify conf
+        - restart nginx
+      tags:
+        - eu
+
+    - name: Copy new nginx configuration for apac server
+      template:
+        src: confs/nginx_apac.conf.j2
+        dest: /etc/nginx/sites-enabled/apac.conf
+      notify:
+        - verify conf
+        - restart nginx
+      tags:
+        - apac                   
+
+    - name: Copy new nginx configuration for latam
+      template:
+        src: confs/nginx_latam.conf.j2
+        dest: /etc/nginx/sites-enabled/latam.conf
+      notify:
+        - verify conf
+        - restart nginx
+      tags:
+        - latam
+      
+  handlers:
+    - name: verify conf
+      command: nginx -t
+      register: nginx_test_output
+      changed_when: false
+
+    - name: restart nginx
+      service:
+        name: nginx
+        state: restarted
+      when: nginx_test_output.rc == 0

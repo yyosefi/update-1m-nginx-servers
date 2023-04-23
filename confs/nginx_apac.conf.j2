@@ -1,0 +1,13 @@
+server {
+	listen 80;
+	listen [::]:80;
+
+	server_name apac.example.dev;
+
+    root /var/www/html/apac;
+	index index.html;
+
+	location / {
+		try_files $uri $uri/ =404;
+	}
+}

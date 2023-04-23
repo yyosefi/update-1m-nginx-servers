@@ -1,0 +1,107 @@
+---
+- name: Rollback configuration
+  hosts: nginx
+  become: true
+  
+  vars:
+    config_path: /etc/nginx/sites-enabled/
+    backup_dir: /etc/nginx/backups
+
+  tasks:
+    - name: Create backup directory
+      file:
+        path: "{{ backup_dir }}"
+        state: directory
+      
+    - name: Rollback for us region  ##  us 
+      block:
+        - name: Create backup of current configuration for us regio
+          command: "cp {{ config_path }}/us.conf {{ config_path }}/nginx.conf.backup.us"
+          tags:
+            - us  
+
+        - name: Rollback to previous configuration
+          command: "cp {{ backup_dir }}/nginx.conf.backup.us {{ config_path }}/us.conf"
+          ignore_errors: yes
+          tags:
+            - us  
+
+
+        - name: move backup of current configuration for us region to backup path
+          command: "mv {{ config_path }}/nginx.conf.backup.us {{ backup_dir }}/nginx.conf.backup.us"
+          notify: restart nginx
+          tags:
+            - us  
+      tags:
+        - us  
+
+    - name: Rollback for eu region ##  eu
+      block:
+        - name: Create backup of current configuration for eu region 
+          command: "cp {{ config_path }}/eu.conf {{ config_path }}/nginx.conf.backup.eu"
+          tags:
+            - eu  
+
+        - name: Rollback to previous configuration
+          command: "cp {{ backup_dir }}/nginx.conf.backup.eu {{ config_path }}/eu.conf"
+          ignore_errors: yes
+          tags:
+            - eu 
+
+        - name: move backup of current configuration for eu region to backup path
+          command: "mv {{ config_path }}/nginx.conf.backup.eu {{ backup_dir }}/nginx.conf.backup.eu"
+          notify: restart nginx
+          tags:
+            - eu
+      tags:
+        - eu
+
+    - name: Rollback for apac region ##  apac
+      block:
+        - name: Create backup of current configuration for apac region 
+          command: "cp {{ config_path }}/apac.conf {{ config_path }}/nginx.conf.backup.apac"
+          tags:
+            - apac
+
+        - name: Rollback to previous configuration
+          command: "cp {{ backup_dir }}/nginx.conf.backup.apac {{ config_path }}/apac.conf"
+          ignore_errors: yes
+          tags:
+            - apac
+
+        - name: move backup of current configuration for apac region to backup path
+          command: "mv {{ config_path }}/nginx.conf.backup.apac {{ backup_dir }}/nginx.conf.backup.apac"
+          notify: restart nginx
+          tags:
+            - apac
+      tags:
+        - apac
+
+
+    - name: Rollback for latam region # latam
+      block:
+        - name: Create backup of current configuration for latam region  
+          command: "cp {{ config_path }}/latam.conf {{ config_path }}/nginx.conf.backup.latam"
+          tags:
+            - latam 
+
+        - name: Rollback to previous configuration
+          command: "cp {{ backup_dir }}/nginx.conf.backup.latam {{ config_path }}/latam.conf"
+          ignore_errors: yes
+          tags:
+            - latam 
+
+        - name: move backup of current configuration for latam region to backup path
+          command: "mv {{ config_path }}/nginx.conf.backup.latam {{ backup_dir }}/nginx.conf.backup.latam"
+          notify: restart nginx
+          tags:
+            - latam
+      tags:
+        - latam
+      
+      
+  handlers:
+    - name: restart nginx
+      service:
+        name: nginx
+        state: restarted
